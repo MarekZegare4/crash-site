@@ -1,0 +1,19 @@
+node_modules
+
+# environment variables - never commit real secrets
+.env
+.env.local
+.env.*.local
+
+# OS noise
+.DS_Store
+
+# build outputs
+backend/dist
+frontend/dist
+frontend/tsconfig.tsbuildinfo
+
+# runtime data - contains user data and uploaded files
+data/
+uploads/
+backups/

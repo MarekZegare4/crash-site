@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- pin shape, amber fill, transparent background -->
+  <g transform="translate(2.65 0) scale(0.1778)">
+    <path d="M 75 10 C 40 10 22 36 22 62 C 22 100 75 155 75 155 C 75 155 128 100 128 62 C 128 36 110 10 75 10 Z" fill="oklch(0.68 0.22 38)"/>
+    <!-- drone cross-arms, thicker for visibility at small size -->
+    <line x1="61" y1="54" x2="89" y2="70" stroke="#2a2b32" stroke-width="5" stroke-linecap="round"/>
+    <line x1="89" y1="54" x2="61" y2="70" stroke="#2a2b32" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>
