@@ -1355,6 +1355,15 @@ button, a {
   box-shadow: 0 8px 24px oklch(from var(--accent) l c h / 0.50), 0 1px 3px oklch(0.10 0.005 260 / 0.30);
 }
 
+.fab:disabled {
+  background: var(--muted);
+  color: var(--ink);
+  opacity: 0.9;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 /* Map-pick pill — only shown on mobile, when sheet is hidden for point selection */
 .mapPickPill {
   display: none;
