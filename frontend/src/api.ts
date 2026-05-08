@@ -122,7 +122,13 @@ export async function createListing(payload: Omit<Listing, "id" | "ownerId" | "s
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Cannot create listing");
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const err = new Error("Cannot create listing") as Error & { code?: string; max?: number };
+    err.code = body.error;
+    err.max = body.max;
+    throw err;
+  }
   return res.json();
 }
 
@@ -376,6 +382,7 @@ export interface SiteConfig {
   siteUrl: string;
   siteUrlLocked?: boolean;
   nickCooldownDays: number;
+  maxListingsPerUser: number;
 }
 
 export async function fetchSiteConfig(): Promise<SiteConfig> {

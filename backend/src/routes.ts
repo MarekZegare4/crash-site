@@ -6,7 +6,7 @@ import rateLimit from "express-rate-limit";
 import sharp from "sharp";
 import { z } from "zod";
 import { authMe, mockSocialLogin, requireAdmin, requireAuth, issueToken, roleForSocialUser, AUTH_COOKIE, COOKIE_OPTIONS } from "./mockAuth.js";
-import { dbAddListing, dbDeleteListing, dbGetListingById, dbGetPublicListingById, dbGetListingsByOwner, dbGetPrivateListingByToken, dbGetPublicListings, dbListingStats, dbUpdateListing, dbUpdateListingStatus, dbGetListingsForAdmin, dbGetUsersForAdmin, dbDeleteUser, dbUpdateUserRole, dbSetUserBanned, dbAdminResetNickCooldown, dbAdminSetUserNick, dbUpsertUser, dbGetUserPublicProfile, dbAddReport, dbGetReportsForAdmin, dbUpdateReportStatus, dbCheckNickAvailable, dbUpdateUserNickContact, dbGetAdminStats, dbLogAdminAction, dbGetAdminLogs, dbGetAnnouncements, dbCreateAnnouncement, dbDeleteAnnouncement, dbGetConfig, dbSetConfig, dbGetUserById } from "./db.js";
+import { dbAddListing, dbDeleteListing, dbGetListingById, dbGetPublicListingById, dbGetListingsByOwner, dbGetPrivateListingByToken, dbGetPublicListings, dbListingStats, dbUpdateListing, dbUpdateListingStatus, dbGetListingsForAdmin, dbGetUsersForAdmin, dbDeleteUser, dbUpdateUserRole, dbSetUserBanned, dbAdminResetNickCooldown, dbAdminSetUserNick, dbUpsertUser, dbGetUserPublicProfile, dbAddReport, dbGetReportsForAdmin, dbUpdateReportStatus, dbCheckNickAvailable, dbUpdateUserNickContact, dbGetAdminStats, dbLogAdminAction, dbGetAdminLogs, dbGetAnnouncements, dbCreateAnnouncement, dbDeleteAnnouncement, dbGetConfig, dbSetConfig, dbGetUserById, dbCountListingsByOwner } from "./db.js";
 import type { Listing } from "./types.js";
 import type { AuthUser } from "./mockAuth.js";
 
@@ -450,6 +450,13 @@ appRouter.post("/listings", createListingLimiter, requireAuth, (req, res) => {
   const user = (req as typeof req & { user: { id: string } }).user;
   const payload = parsed.data;
 
+  const maxListings = parseInt(dbGetConfig("maxListingsPerUser") ?? "3", 10);
+  const userListingCount = dbCountListingsByOwner(user.id);
+  if (userListingCount >= maxListings) {
+    res.status(403).json({ error: "listing_limit_reached", max: maxListings });
+    return;
+  }
+
   const listing: Listing = {
     id: crypto.randomUUID(),
     ...payload,
@@ -819,6 +826,7 @@ function buildConfigResponse() {
     siteUrl: ENV_SITE_URL ?? dbGetConfig("siteUrl") ?? "",
     siteUrlLocked: ENV_SITE_URL !== null,
     nickCooldownDays: parseInt(dbGetConfig("nickCooldownDays") ?? "30", 10),
+    maxListingsPerUser: parseInt(dbGetConfig("maxListingsPerUser") ?? "3", 10),
   };
 }
 
@@ -830,6 +838,7 @@ appRouter.post("/admin/config", requireAuth, requireAdmin, (req, res) => {
   const parsed = z.object({
     siteUrl: z.string().url().or(z.literal("")).optional(),
     nickCooldownDays: z.number().int().min(0).max(365).optional(),
+    maxListingsPerUser: z.number().int().min(1).max(1000).optional(),
   }).safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return; }
   const admin = adminUser(req);
@@ -840,6 +849,10 @@ appRouter.post("/admin/config", requireAuth, requireAdmin, (req, res) => {
   if (parsed.data.nickCooldownDays !== undefined) {
     dbSetConfig("nickCooldownDays", String(parsed.data.nickCooldownDays));
     dbLogAdminAction(admin.id, admin.displayName, "set_config", "listing", "nickCooldownDays", { value: String(parsed.data.nickCooldownDays) });
+  }
+  if (parsed.data.maxListingsPerUser !== undefined) {
+    dbSetConfig("maxListingsPerUser", String(parsed.data.maxListingsPerUser));
+    dbLogAdminAction(admin.id, admin.displayName, "set_config", "listing", "maxListingsPerUser", { value: String(parsed.data.maxListingsPerUser) });
   }
   res.json(buildConfigResponse());
 });

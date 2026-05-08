@@ -226,6 +226,8 @@ export const en = {
   admin_configNickCooldown: "Nick change cooldown",
   admin_configNickCooldownDesc: "Minimum number of days between nick changes. Set to 0 to disable.",
   admin_configDays: "days",
+  admin_configMaxListings: "Max listings per user",
+  admin_configMaxListingsDesc: "Maximum total number of listings a single user can create.",
 
   admin_code: "ADMIN",
   admin_sub: "admin panel",
@@ -299,6 +301,7 @@ export const en = {
   err_contactTooLong: "Contact must be 200 characters or fewer",
   err_uploadFailed: "Failed to upload photo — check your connection",
   err_createFailed: "Failed to add listing",
+  err_listingLimitReached: "You have reached the maximum number of listings ({max}). Delete or resolve existing ones to add more.",
 
   form_expiry: "Expires after",
   form_expiry_7d: "7 d",

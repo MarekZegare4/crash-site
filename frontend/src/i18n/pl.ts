@@ -228,6 +228,8 @@ export const pl: Translations = {
   admin_configNickCooldown: "Cooldown zmiany nicku",
   admin_configNickCooldownDesc: "Minimalna liczba dni między zmianami nicku. Ustaw 0 aby wyłączyć.",
   admin_configDays: "dni",
+  admin_configMaxListings: "Maks. ogłoszeń na użytkownika",
+  admin_configMaxListingsDesc: "Maksymalna łączna liczba ogłoszeń, które może utworzyć jeden użytkownik.",
 
   admin_code: "ADMIN",
   admin_sub: "panel administratora",
@@ -301,6 +303,7 @@ export const pl: Translations = {
   err_contactTooLong: "Kontakt może mieć maksymalnie 200 znaków",
   err_uploadFailed: "Nie udało się przesłać zdjęcia — sprawdź połączenie",
   err_createFailed: "Nie udało się dodać zgłoszenia",
+  err_listingLimitReached: "Osiągnięto maksymalną liczbę ogłoszeń ({max}). Usuń lub rozwiąż istniejące, aby dodać nowe.",
 
   form_expiry: "Wygasa po",
   form_expiry_7d: "7 d",

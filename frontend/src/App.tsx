@@ -77,6 +77,7 @@ export default function App() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [userNick, setUserNick] = useState(() => window.localStorage.getItem("crashsite.defaultNick") ?? "");
   const [userContact, setUserContact] = useState(() => window.localStorage.getItem("crashsite.defaultContact") ?? "");
+  const [maxListingsPerUser, setMaxListingsPerUser] = useState(3);
   const [activePage, setActivePage] = useState<Page>("mapa");
   const [menuOpen, setMenuOpen] = useState(false);
   const [listingFilter, setListingFilter] = useState<"all" | "lost" | "found">("all");
@@ -198,7 +199,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    void fetchSiteConfig().then(cfg => { if (cfg.siteUrl) setSiteOrigin(cfg.siteUrl); });
+    void fetchSiteConfig().then(cfg => { if (cfg.siteUrl) setSiteOrigin(cfg.siteUrl); setMaxListingsPerUser(cfg.maxListingsPerUser); });
 
     const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:4000/api";
     const source = new EventSource(`${apiBase}/announcements/stream`, { withCredentials: true });
@@ -278,6 +279,8 @@ export default function App() {
     () => new Set(myListings.filter((l) => !l.isPublic).map((l) => l.id)),
     [myListings]
   );
+
+  const listingLimitReached = !!currentUser && myListings.length >= maxListingsPerUser;
 
   const visibleListings = useMemo(() => {
     const privateOwn = myListings.filter(
@@ -1071,6 +1074,8 @@ export default function App() {
                 <button
                   key={key}
                   className={`menuItem ${activePage === key ? "active" : ""}`}
+                  disabled={key === "dodawanie" && listingLimitReached}
+                  title={key === "dodawanie" && listingLimitReached ? t("err_listingLimitReached", { max: String(maxListingsPerUser) }) : undefined}
                   onClick={() => {
                     if (key === "logowanie") { openLoginScreen(); return; }
                     selectPage(key);
@@ -1179,6 +1184,8 @@ export default function App() {
       <div className="fabGroup">
         {activePage === "mapa" && <button
           className="fab"
+          disabled={listingLimitReached}
+          title={listingLimitReached ? t("err_listingLimitReached", { max: String(maxListingsPerUser) }) : undefined}
           onClick={() => {
             if (!currentUser) { openLoginScreen(); return; }
             setActivePage("dodawanie");

@@ -744,6 +744,11 @@ export function dbGetListingOwnerByImage(imageFilename: string): { isPublic: boo
   return row ? { isPublic: Number(row.isPublic) === 1, ownerId: row.ownerId, privateToken: row.privateToken } : null;
 }
 
+export function dbCountListingsByOwner(ownerId: string): number {
+  const row = db.prepare("SELECT COUNT(*) as n FROM listings WHERE ownerId = ?").get(ownerId) as { n: number };
+  return row.n;
+}
+
 export function dbGetConfig(key: string): string | null {
   const row = db.prepare("SELECT value FROM config WHERE key = ?").get(key) as { value: string } | undefined;
   return row?.value ?? null;

@@ -93,6 +93,7 @@ export default function AdminView({ user }: Props) {
   const [siteUrl, setSiteUrl] = useState("");
   const [siteUrlLocked, setSiteUrlLocked] = useState(false);
   const [nickCooldownDays, setNickCooldownDays] = useState(30);
+  const [maxListingsPerUser, setMaxListingsPerUser] = useState(3);
   const [configSaving, setConfigSaving] = useState(false);
   const [configSaved, setConfigSaved] = useState(false);
   const [configError, setConfigError] = useState<string | null>(null);
@@ -114,7 +115,7 @@ export default function AdminView({ user }: Props) {
     if (user.role !== "admin") return;
     setLoading(true);
     Promise.all([fetchAdminListings(), fetchAdminUsers(), fetchAdminReports(), fetchAdminStats(), fetchAdminLogs(), fetchAnnouncements(), fetchSiteConfig()])
-      .then(([ls, us, rs, st, lg, anns, cfg]) => { setListings(ls); setUsers(us); setReports(rs); setStats(st); setLogs(lg); setAnnouncements(anns); setSiteUrl(cfg.siteUrl); setSiteUrlLocked(cfg.siteUrlLocked ?? false); setNickCooldownDays(cfg.nickCooldownDays); setError(null); })
+      .then(([ls, us, rs, st, lg, anns, cfg]) => { setListings(ls); setUsers(us); setReports(rs); setStats(st); setLogs(lg); setAnnouncements(anns); setSiteUrl(cfg.siteUrl); setSiteUrlLocked(cfg.siteUrlLocked ?? false); setNickCooldownDays(cfg.nickCooldownDays); setMaxListingsPerUser(cfg.maxListingsPerUser); setError(null); })
       .catch(() => setError(t("admin_loadError")))
       .finally(() => setLoading(false));
   }, []);
@@ -206,9 +207,10 @@ export default function AdminView({ user }: Props) {
     setConfigSaving(true);
     setConfigError(null);
     try {
-      const saved = await adminSaveConfig({ ...(!siteUrlLocked && { siteUrl: siteUrl.trim() }), nickCooldownDays });
+      const saved = await adminSaveConfig({ ...(!siteUrlLocked && { siteUrl: siteUrl.trim() }), nickCooldownDays, maxListingsPerUser });
       setSiteUrl(saved.siteUrl);
       setNickCooldownDays(saved.nickCooldownDays);
+      setMaxListingsPerUser(saved.maxListingsPerUser);
       setConfigSaved(true);
       setTimeout(() => setConfigSaved(false), 2000);
     } catch {
@@ -633,6 +635,20 @@ export default function AdminView({ user }: Props) {
               {siteUrlLocked && (
                 <span className="adminConfigLocked">{t("admin_configSiteUrlLocked")}</span>
               )}
+            </div>
+
+            <h3 className="adminConfigTitle" style={{ marginTop: 20 }}>{t("admin_configMaxListings")}</h3>
+            <p className="adminConfigDesc">{t("admin_configMaxListingsDesc")}</p>
+            <div className="adminConfigRow">
+              <input
+                className="adminConfigInput"
+                type="number"
+                min={1}
+                max={1000}
+                value={maxListingsPerUser}
+                onChange={e => { setMaxListingsPerUser(Number(e.target.value)); setConfigSaved(false); setConfigError(null); }}
+                style={{ maxWidth: 100 }}
+              />
             </div>
 
             <h3 className="adminConfigTitle" style={{ marginTop: 20 }}>{t("admin_configNickCooldown")}</h3>

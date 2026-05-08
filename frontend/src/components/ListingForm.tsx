@@ -143,8 +143,13 @@ export default function ListingForm({
       setImageFiles([]);
       onContactChange(contact);
       onCreated(created);
-    } catch {
-      setError(t("err_createFailed"));
+    } catch (e) {
+      const err = e as { code?: string; max?: number };
+      if (err.code === "listing_limit_reached") {
+        setError(t("err_listingLimitReached", { max: String(err.max ?? "") }));
+      } else {
+        setError(t("err_createFailed"));
+      }
     } finally {
       setSubmitting(false);
     }
